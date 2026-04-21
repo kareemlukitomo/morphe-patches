@@ -12,9 +12,7 @@ jobs:
     name: Release
     permissions:
       contents: write
-      packages: write
-      id-token: write
-      attestations: write
+      packages: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,8 +29,11 @@ jobs:
 
       - name: Build
         env:
+          GPR_KEY: ${{ secrets.GPR_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :patches:buildAndroid generatePatchesList clean
+        run: |
+          export GITHUB_TOKEN="${GPR_KEY:-$GITHUB_TOKEN}"
+          ./gradlew :patches:buildAndroid generatePatchesList clean
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -43,22 +44,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          fingerprint: ${{ vars.GPG_FINGERPRINT }}
-
       - name: Release
         uses: cycjimmy/semantic-release-action@v5
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Attest
-        if: steps.release.outputs.new_release_published == 'true'
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-name: 'Morphe Patches ${{ steps.release.outputs.new_release_git_tag }}'
-          subject-path: patches/build/libs/patches-*.mpp

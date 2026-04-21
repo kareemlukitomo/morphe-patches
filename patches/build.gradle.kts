@@ -2,13 +2,13 @@ group = "app.morphe"
 
 patches {
     about {
-        name = "XYZ Patches for use with Morphe"
-        description = "Example patches"
-        source = "git@github.com:MorpheApp/morphe-patches-template.git"
-        author = "Awesome dev"
-        contact = "na"
-        website = "https://morphe.software"
-        license = "GPLv3"
+        name = "Kareem Patches"
+        description = "Targeted patches for use with Morphe, currently focused on Instagram share links."
+        source = "git@github.com:kareemlukitomo/morphe-patches.git"
+        author = "kareemlukitomo"
+        contact = "https://github.com/kareemlukitomo/morphe-patches/issues"
+        website = "https://github.com/kareemlukitomo/morphe-patches"
+        license = "GNU General Public License v3.0"
     }
 }
 
@@ -30,7 +30,7 @@ tasks {
         dependsOn(build)
 
         classpath = sourceSets["main"].runtimeClasspath
-        mainClass.set("app.morphe.util.PatchListGeneratorKt")
+        mainClass.set("app.kareem.util.PatchListGeneratorKt")
     }
     // Used by gradle-semantic-release-plugin.
     publish {

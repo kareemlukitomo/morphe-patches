@@ -1,30 +1,21 @@
-# 👋 Contribution guidelines
+# Contribution Guidelines
 
-This document describes how to contribute to Morphe Patches template.
+This document describes how to contribute to Kareem Patches for Morphe.
 
-## 📖 Resources to help you get started
+## Resources
 
-* [Issues](https://github.com/Morpheapp/morphe-patches-template/issues) are where we keep track of bugs and feature requests
+- Issues: <https://github.com/kareemlukitomo/morphe-patches/issues>
 
-## 🙏 Submitting a feature request
+## Workflow
 
-Features can be requested by opening an issue using the
-[Feature request issue template](https://github.com/MorpheApp/morphe-patches-template/issues/new?labels=Feature+request&template=feature_request.yml&title=feat%3A+).
+1. Open an issue first if the change affects compatibility, release flow, or user-facing behavior.
+2. Create your branch from `dev`.
+3. Use semantic commit messages where practical.
+4. Open the pull request against `dev` and link the relevant issue.
+5. Releases are cut from `dev` and `main` by CI after review and merge.
 
-## 🐞 Submitting a bug report
+## Scope
 
-If you encounter a bug while using Morphe Patches template, open an issue using the
-[Bug report issue template](https://github.com/MorpheApp/morphe-patches-template/issues/new?labels=Bug+report&template=bug_report.yml&title=bug%3A+).
-
-## 📝 How to contribute
-
-1. Before contributing, it is recommended to open an issue to discuss your change
-with the maintainers of Morphe Patches template
-2. Development happens on the `dev` branch. Fork the repository and create your branch from `dev`
-3. Commit your changes
-4. Submit a pull request to the `dev` branch of the repository and reference issues
-that your pull request closes in the description of your pull request
-5. Our team will review your pull request and provide feedback. Once your pull request is approved,
-it will be merged into the `dev` branch and will be included in the next release of Morphe Patches template
-
-❤️ Thank you for considering contributing to Morphe Patches template
+- Keep changes narrowly targeted to supported apps and patch behavior.
+- Do not introduce branding that suggests authorship by Morphe itself.
+- If you touch release tooling, keep GitHub releases, signatures, and docs in sync.

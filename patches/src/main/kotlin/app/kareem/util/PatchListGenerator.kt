@@ -31,7 +31,7 @@
  * applicable to this file.
  */
 
-package app.morphe.util
+package app.kareem.util
 
 import app.morphe.patcher.patch.Patch
 import app.morphe.patcher.patch.loadPatchesFromJar
@@ -49,9 +49,9 @@ internal fun main() {
         File("build/libs/").listFiles { file ->
             val fileName = file.name
             !fileName.contains("javadoc") &&
-                    !fileName.contains("sources") &&
-                    fileName.endsWith(".mpp")
-        }!!.first()
+                !fileName.contains("sources") &&
+                fileName.endsWith(".mpp")
+        }!!.first(),
     )
     val loadedPatches = loadPatchesFromJar(patchFiles)
     val patchClassLoader = URLClassLoader(patchFiles.map { it.toURI().toURL() }.toTypedArray())
@@ -92,19 +92,18 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         )
     }
 
-    val gsonBuilder = GsonBuilder()
-        .serializeNulls()
-        .disableHtmlEscaping()
-        .setPrettyPrinting()
-        .create()
+    val gsonBuilder =
+        GsonBuilder()
+            .serializeNulls()
+            .disableHtmlEscaping()
+            .setPrettyPrinting()
+            .create()
 
     val jsonObject = JsonObject()
     jsonObject.addProperty("version", "v$version")
     jsonObject.add("patches", gsonBuilder.toJsonTree(patchesMap))
 
-    listJson.writeText(
-        gsonBuilder.toJson(jsonObject)
-    )
+    listJson.writeText(gsonBuilder.toJson(jsonObject))
 }
 
 @Suppress("unused")
@@ -126,4 +125,3 @@ private class JsonPatch(
         val values: Map<String, Any?>?,
     )
 }
-
