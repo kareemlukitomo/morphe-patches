@@ -1,15 +1,19 @@
 # Kareem Patches for Morphe
 
-Targeted Morphe-compatible patches for small app-specific fixes. This repository currently focuses on Instagram share links.
+Targeted Morphe-compatible patches for small app-specific share-link fixes.
 
 ## Supported App
 
 Current public support:
 - Instagram `424.0.0.49.64`
 - Instagram `425.0.0.0.0` experimental
+- TikTok `44.9.3`
+- Threads `426.0.0.36.67`
 
 Current patch set:
 - `Change Instagram share domain`
+- `Change TikTok share domain`
+- `Change Threads share domain`
 
 ## Use In Morphe
 

@@ -3,7 +3,7 @@ group = "app.morphe"
 patches {
     about {
         name = "Kareem Patches"
-        description = "Targeted patches for use with Morphe, currently focused on Instagram share links."
+        description = "Targeted patches for use with Morphe, currently focused on app share links."
         source = "git@github.com:kareemlukitomo/morphe-patches.git"
         author = "kareemlukitomo"
         contact = "https://github.com/kareemlukitomo/morphe-patches/issues"

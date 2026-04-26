@@ -24,4 +24,34 @@ object Constants {
                     ),
                 ),
         )
+
+    val COMPATIBILITY_TIKTOK =
+        Compatibility(
+            name = "TikTok",
+            packageName = "com.zhiliaoapp.musically",
+            apkFileType = ApkFileType.APKM,
+            appIconColor = 0xFE2C55,
+            targets =
+                listOf(
+                    AppTarget(
+                        version = "44.9.3",
+                        description = "TikTok Stable version (arm64-v8a + arm-v7a)",
+                    ),
+                ),
+        )
+
+    val COMPATIBILITY_THREADS =
+        Compatibility(
+            name = "Threads",
+            packageName = "com.instagram.barcelona",
+            apkFileType = ApkFileType.APKM,
+            appIconColor = 0x000000,
+            targets =
+                listOf(
+                    AppTarget(
+                        version = "426.0.0.36.67",
+                        description = "Threads Stable version (arm-v7a)",
+                    ),
+                ),
+        )
 }
