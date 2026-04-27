@@ -9,7 +9,6 @@ import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val CUSTOM_URL = "https://shoelace.kareem.one"
 private const val CUSTOM_HOST = "shoelace.kareem.one"
@@ -61,19 +60,21 @@ val changeThreadsShareDomainPatch =
                 mutableClass.methods.forEach { method ->
                     if (method.implementation == null) return@forEach
                     if (method.definingClass.startsWith("Lapp/kareem/extension/")) return@forEach
-                    if (!methodContainsString(method, "android.intent.extra.TEXT")) return@forEach
 
                     method.instructions
                         .withIndex()
-                        .filter { (_, instruction) -> instruction.isIntentPutStringExtra() }
-                        .map { (index, instruction) -> index to instruction.registersUsed[2] }
+                        .mapNotNull { (index, instruction) ->
+                            val rewriteMethod = instruction.extraValueRewriteMethod() ?: return@mapNotNull null
+                            val extraValueRegister = instruction.registersUsed[2]
+                            ExtraValueRewrite(index, extraValueRegister, rewriteMethod)
+                        }
                         .asReversed()
-                        .forEach { (index, extraValueRegister) ->
+                        .forEach { rewrite ->
                             method.addInstructions(
-                                index,
+                                rewrite.index,
                                 """
-                                invoke-static/range { v$extraValueRegister .. v$extraValueRegister }, $EXTENSION_CLASS_DESCRIPTOR->rewriteShareText(Ljava/lang/String;)Ljava/lang/String;
-                                move-result-object v$extraValueRegister
+                                invoke-static/range { v${rewrite.extraValueRegister} .. v${rewrite.extraValueRegister} }, $EXTENSION_CLASS_DESCRIPTOR->${rewrite.rewriteMethod}
+                                move-result-object v${rewrite.extraValueRegister}
                                 """.trimIndent(),
                             )
                         }
@@ -82,21 +83,37 @@ val changeThreadsShareDomainPatch =
         }
     }
 
-private fun methodContainsString(
-    method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod,
-    string: String,
-): Boolean =
-    method.instructions.any { instruction ->
-        ((instruction as? ReferenceInstruction)?.reference as? StringReference)?.string == string
+private data class ExtraValueRewrite(
+    val index: Int,
+    val extraValueRegister: Int,
+    val rewriteMethod: String,
+)
+
+private fun com.android.tools.smali.dexlib2.iface.instruction.Instruction.extraValueRewriteMethod(): String? {
+    if (opcode != Opcode.INVOKE_VIRTUAL) return null
+    val methodReference = (this as? ReferenceInstruction)?.reference as? MethodReference ?: return null
+    if (registersUsed.size < 3) return null
+
+    val isSupportedHolder =
+        methodReference.definingClass == "Landroid/content/Intent;" ||
+            methodReference.definingClass == "Landroid/os/Bundle;" ||
+            methodReference.definingClass == "Landroid/os/BaseBundle;"
+    if (!isSupportedHolder) return null
+    if (methodReference.name != "putExtra" &&
+        methodReference.name != "putString" &&
+        methodReference.name != "putCharSequence"
+    ) {
+        return null
+    }
+    if (methodReference.parameterTypes.size != 2 ||
+        methodReference.parameterTypes[0].toString() != "Ljava/lang/String;"
+    ) {
+        return null
     }
 
-private fun com.android.tools.smali.dexlib2.iface.instruction.Instruction.isIntentPutStringExtra(): Boolean {
-    if (opcode != Opcode.INVOKE_VIRTUAL) return false
-    val methodReference = (this as? ReferenceInstruction)?.reference as? MethodReference ?: return false
-
-    return methodReference.definingClass == "Landroid/content/Intent;" &&
-        methodReference.name == "putExtra" &&
-        methodReference.parameterTypes == listOf("Ljava/lang/String;", "Ljava/lang/String;") &&
-        methodReference.returnType == "Landroid/content/Intent;" &&
-        registersUsed.size >= 3
+    return when (methodReference.parameterTypes[1].toString()) {
+        "Ljava/lang/String;" -> "rewriteShareText(Ljava/lang/String;)Ljava/lang/String;"
+        "Ljava/lang/CharSequence;" -> "rewriteShareCharSequence(Ljava/lang/CharSequence;)Ljava/lang/CharSequence;"
+        else -> null
+    }
 }
