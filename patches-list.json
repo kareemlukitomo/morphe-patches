@@ -1,4 +1,41 @@
 {
-  "version": "",
-  "patches": []
+  "version": "v1.0.0",
+  "patches": [
+    {
+      "name": "Change Instagram share domain",
+      "description": "Rewrites generated Instagram share links to kittygram.kareem.one.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "424.0.0.49.64"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Change Threads share domain",
+      "description": "Rewrites generated Threads share links to shoelace.kareem.one.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.instagram.barcelona": [
+          "426.0.0.36.67"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Change TikTok share domain",
+      "description": "Rewrites generated TikTok share links to sticktock.kareem.one.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.zhiliaoapp.musically": [
+          "44.9.3"
+        ]
+      },
+      "options": []
+    }
+  ]
 }

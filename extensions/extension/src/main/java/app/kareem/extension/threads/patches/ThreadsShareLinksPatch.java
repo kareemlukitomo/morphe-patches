@@ -1,17 +1,14 @@
 package app.kareem.extension.threads.patches;
 
-import java.net.URI;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.net.Uri;
 
 @SuppressWarnings("unused")
 public final class ThreadsShareLinksPatch {
     private static final String CUSTOM_HOST = "shoelace.kareem.one";
-
-    private static final Pattern THREADS_URL_PATTERN = Pattern.compile(
-        "(?i)\\b(?:https?://)?(?:l\\.|www\\.)?threads\\.(?:com|net)(?:/[^\\s]*)?"
-    );
+    private static final String CUSTOM_URL = "https://" + CUSTOM_HOST;
+    private static final String DOT = ".";
 
     private ThreadsShareLinksPatch() {
     }
@@ -21,80 +18,102 @@ public final class ThreadsShareLinksPatch {
             return text;
         }
 
-        Matcher matcher = THREADS_URL_PATTERN.matcher(text);
-        StringBuffer rewrittenText = new StringBuffer(text.length());
-        while (matcher.find()) {
-            String matchedUrl = matcher.group();
-            String trailingPunctuation = trailingPunctuation(matchedUrl);
-            String urlWithoutTrailingPunctuation = matchedUrl.substring(
-                0,
-                matchedUrl.length() - trailingPunctuation.length()
-            );
-
-            String rewrittenUrl = rewriteShareUrl(urlWithoutTrailingPunctuation);
-            matcher.appendReplacement(
-                rewrittenText,
-                Matcher.quoteReplacement(rewrittenUrl + trailingPunctuation)
-            );
-        }
-        matcher.appendTail(rewrittenText);
-
-        return rewrittenText.toString();
+        String rewrittenText = text;
+        rewrittenText = replaceIgnoreCase(rewrittenText, host("www", "com"), CUSTOM_HOST);
+        rewrittenText = replaceIgnoreCase(rewrittenText, host("www", "net"), CUSTOM_HOST);
+        rewrittenText = replaceIgnoreCase(rewrittenText, host("l", "com"), CUSTOM_HOST);
+        rewrittenText = replaceIgnoreCase(rewrittenText, host("l", "net"), CUSTOM_HOST);
+        rewrittenText = replaceIgnoreCase(rewrittenText, host(null, "com"), CUSTOM_HOST);
+        rewrittenText = replaceIgnoreCase(rewrittenText, host(null, "net"), CUSTOM_HOST);
+        return rewrittenText;
     }
 
-    public static String rewriteShareUrl(String url) {
-        if (url == null || url.isBlank()) {
-            return url;
+    public static String rewriteShareCharSequence(CharSequence text) {
+        if (text == null) {
+            return null;
+        }
+
+        return rewriteShareText(text.toString());
+    }
+
+    public static ClipData rewriteClipData(ClipData clipData) {
+        if (clipData == null) {
+            return null;
         }
 
         try {
-            String parseableUrl = hasScheme(url) ? url : "https://" + url;
-            URI uri = new URI(parseableUrl);
-            String host = uri.getHost();
-            if (host == null || !isThreadsHost(host)) {
-                return url;
+            int itemCount = clipData.getItemCount();
+            if (itemCount <= 0) {
+                return clipData;
             }
 
-            return new URI(
-                "https",
-                uri.getUserInfo(),
-                CUSTOM_HOST,
-                uri.getPort(),
-                uri.getPath(),
-                null,
-                uri.getFragment()
-            ).toString();
+            ClipData rewrittenClipData = null;
+            for (int index = 0; index < itemCount; index++) {
+                ClipData.Item item = clipData.getItemAt(index);
+                CharSequence text = item.getText();
+                String htmlText = item.getHtmlText();
+                Uri uri = item.getUri();
+                String rewrittenText = text == null ? null : rewriteShareText(text.toString());
+                String rewrittenHtmlText = htmlText == null ? null : rewriteShareText(htmlText);
+                Uri rewrittenUri = uri == null ? null : Uri.parse(rewriteShareText(uri.toString()));
+                ClipData.Item rewrittenItem = new ClipData.Item(
+                    rewrittenText,
+                    rewrittenHtmlText,
+                    item.getIntent(),
+                    rewrittenUri
+                );
+
+                if (rewrittenClipData == null) {
+                    ClipDescription description = clipData.getDescription();
+                    rewrittenClipData = new ClipData(description, rewrittenItem);
+                } else {
+                    rewrittenClipData.addItem(rewrittenItem);
+                }
+            }
+
+            return rewrittenClipData == null ? clipData : rewrittenClipData;
         } catch (Exception ignored) {
-            return url;
+            return clipData;
         }
     }
 
-    private static boolean hasScheme(String url) {
-        return url.regionMatches(true, 0, "http://", 0, 7) ||
-            url.regionMatches(true, 0, "https://", 0, 8);
+    public static String rewriteShareUrl(String url) {
+        return rewriteShareText(url);
     }
 
-    private static boolean isThreadsHost(String host) {
-        String normalizedHost = host.toLowerCase(Locale.ROOT);
-        return normalizedHost.equals("threads.com") ||
-            normalizedHost.equals("www.threads.com") ||
-            normalizedHost.equals("l.threads.com") ||
-            normalizedHost.equals("threads.net") ||
-            normalizedHost.equals("www.threads.net");
+    private static String host(String prefix, String tld) {
+        String base = "threads" + DOT + tld;
+        return prefix == null ? base : prefix + DOT + base;
     }
 
-    private static String trailingPunctuation(String url) {
-        int end = url.length();
-        while (end > 0) {
-            char character = url.charAt(end - 1);
-            if (character == '.' || character == ',' || character == '!' || character == '?' ||
-                character == ';' || character == ':' || character == ')' || character == ']' ||
-                character == '}') {
-                end--;
-            } else {
-                break;
+    private static String replaceIgnoreCase(String input, String target, String replacement) {
+        int targetLength = target.length();
+        int start = 0;
+        int match = indexOfIgnoreCase(input, target, start);
+        if (match < 0) {
+            return input;
+        }
+
+        StringBuilder builder = new StringBuilder(input.length() + replacement.length());
+        do {
+            builder.append(input, start, match);
+            builder.append(replacement);
+            start = match + targetLength;
+            match = indexOfIgnoreCase(input, target, start);
+        } while (match >= 0);
+
+        builder.append(input, start, input.length());
+        return builder.toString();
+    }
+
+    private static int indexOfIgnoreCase(String input, String target, int start) {
+        int max = input.length() - target.length();
+        for (int index = start; index <= max; index++) {
+            if (input.regionMatches(true, index, target, 0, target.length())) {
+                return index;
             }
         }
-        return url.substring(end);
+
+        return -1;
     }
 }
