@@ -25,7 +25,7 @@ public final class ThreadsShareLinksPatch {
         rewrittenText = replaceIgnoreCase(rewrittenText, host("l", "net"), CUSTOM_HOST);
         rewrittenText = replaceIgnoreCase(rewrittenText, host(null, "com"), CUSTOM_HOST);
         rewrittenText = replaceIgnoreCase(rewrittenText, host(null, "net"), CUSTOM_HOST);
-        return rewrittenText;
+        return stripQueryStrings(rewrittenText);
     }
 
     public static String rewriteShareCharSequence(CharSequence text) {
@@ -115,5 +115,92 @@ public final class ThreadsShareLinksPatch {
         }
 
         return -1;
+    }
+
+    private static String stripQueryStrings(String input) {
+        int hostStart = indexOfIgnoreCase(input, CUSTOM_HOST, 0);
+        if (hostStart < 0) {
+            return input;
+        }
+
+        StringBuilder builder = null;
+        int copiedUntil = 0;
+        while (hostStart >= 0) {
+            int tokenEnd = findTokenEnd(input, hostStart + CUSTOM_HOST.length());
+            int queryStart = indexOf(input, '?', hostStart + CUSTOM_HOST.length(), tokenEnd);
+            if (queryStart >= 0) {
+                int trailingStart = trimTrailingPunctuation(input, queryStart, tokenEnd);
+                int fragmentStart = indexOf(input, '#', queryStart + 1, trailingStart);
+                if (builder == null) {
+                    builder = new StringBuilder(input.length());
+                }
+
+                builder.append(input, copiedUntil, queryStart);
+                if (fragmentStart >= 0) {
+                    builder.append(input, fragmentStart, trailingStart);
+                }
+                builder.append(input, trailingStart, tokenEnd);
+                copiedUntil = tokenEnd;
+            }
+
+            hostStart = indexOfIgnoreCase(input, CUSTOM_HOST, tokenEnd);
+        }
+
+        if (builder == null) {
+            return input;
+        }
+
+        builder.append(input, copiedUntil, input.length());
+        return builder.toString();
+    }
+
+    private static int findTokenEnd(String input, int start) {
+        int length = input.length();
+        for (int index = start; index < length; index++) {
+            if (isUrlDelimiter(input.charAt(index))) {
+                return index;
+            }
+        }
+
+        return length;
+    }
+
+    private static boolean isUrlDelimiter(char character) {
+        return Character.isWhitespace(character) ||
+            character == '"' ||
+            character == '\'' ||
+            character == '<' ||
+            character == '>';
+    }
+
+    private static int indexOf(String input, char target, int start, int end) {
+        for (int index = start; index < end; index++) {
+            if (input.charAt(index) == target) {
+                return index;
+            }
+        }
+
+        return -1;
+    }
+
+    private static int trimTrailingPunctuation(String input, int queryStart, int tokenEnd) {
+        int end = tokenEnd;
+        while (end > queryStart && isTrailingPunctuation(input.charAt(end - 1))) {
+            end--;
+        }
+
+        return end;
+    }
+
+    private static boolean isTrailingPunctuation(char character) {
+        return character == '.' ||
+            character == ',' ||
+            character == '!' ||
+            character == '?' ||
+            character == ';' ||
+            character == ':' ||
+            character == ')' ||
+            character == ']' ||
+            character == '}';
     }
 }
