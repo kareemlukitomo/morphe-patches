@@ -1,7 +1,5 @@
 package app.kareem.extension.threads.patches;
 
-import android.util.Log;
-
 import java.net.URI;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -9,7 +7,6 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public final class ThreadsShareLinksPatch {
-    private static final String TAG = "KareemThreadsLinks";
     private static final String CUSTOM_HOST = "shoelace.kareem.one";
 
     private static final Pattern THREADS_URL_PATTERN = Pattern.compile(
@@ -42,22 +39,7 @@ public final class ThreadsShareLinksPatch {
         }
         matcher.appendTail(rewrittenText);
 
-        String result = rewrittenText.toString();
-        if (!result.equals(text)) {
-            Log.d(TAG, "Rewrote Threads share text");
-        }
-
-        return result;
-    }
-
-    public static CharSequence rewriteShareCharSequence(CharSequence text) {
-        if (text == null) {
-            return null;
-        }
-
-        String originalText = text.toString();
-        String rewrittenText = rewriteShareText(originalText);
-        return rewrittenText.equals(originalText) ? text : rewrittenText;
+        return rewrittenText.toString();
     }
 
     public static String rewriteShareUrl(String url) {
