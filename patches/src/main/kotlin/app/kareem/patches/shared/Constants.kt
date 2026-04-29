@@ -54,4 +54,24 @@ object Constants {
                     ),
                 ),
         )
+
+    val COMPATIBILITY_REDDIT =
+        Compatibility(
+            name = "Reddit",
+            packageName = "com.reddit.frontpage",
+            apkFileType = ApkFileType.APKM,
+            appIconColor = 0xFF4500,
+            targets =
+                listOf(
+                    AppTarget(
+                        version = "2026.17.0",
+                        description = "Reddit Stable version (arm64-v8a + arm-v7a + x86_64)",
+                    ),
+                    AppTarget(
+                        version = "2026.13.0",
+                        description = "Previously validated Reddit version",
+                        isExperimental = true,
+                    ),
+                ),
+        )
 }

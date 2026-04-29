@@ -14,6 +14,18 @@
       "options": []
     },
     {
+      "name": "Change Reddit share domain",
+      "description": "Rewrites generated Reddit share links to redlib.kareem.one.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.reddit.frontpage": [
+          "2026.17.0"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Change Threads share domain",
       "description": "Rewrites generated Threads share links to shoelace.kareem.one.",
       "use": true,
@@ -33,6 +45,18 @@
       "compatiblePackages": {
         "com.zhiliaoapp.musically": [
           "44.9.3"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Sanitize Reddit share links",
+      "description": "Stops Reddit from appending tracking query parameters to shared links.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.reddit.frontpage": [
+          "2026.17.0"
         ]
       },
       "options": []

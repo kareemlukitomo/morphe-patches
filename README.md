@@ -2,27 +2,27 @@
 
 Targeted Morphe-compatible patches for small app-specific share-link fixes.
 
-## Supported App
+## Supported apps and patches
 
-Current public support:
-- Instagram `424.0.0.49.64`
-- Instagram `425.0.0.0.0` experimental
-- TikTok `44.9.3`
-- Threads `426.0.0.36.67`
+| App | Package | Target APK/APKM | Patches |
+| --- | --- | --- | --- |
+| Instagram | `com.instagram.android` | [`424.0.0.49.64`](https://www.apkmirror.com/apk/instagram/instagram-instagram/instagram-instagram-424-0-0-49-64-release/) | `Change Instagram share domain` |
+| Threads | `com.instagram.barcelona` | [`426.0.0.36.67`](https://www.apkmirror.com/apk/instagram/threads/threads-426-0-0-36-67-release/) | `Change Threads share domain` |
+| TikTok | `com.zhiliaoapp.musically` | [`44.9.3`](https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly-44-9-3-release/) | `Change TikTok share domain` |
+| Reddit | `com.reddit.frontpage` | [`2026.17.0`](https://www.apkmirror.com/apk/redditinc/reddit/reddit-2026-17-0-release/) | `Change Reddit share domain`, `Sanitize Reddit share links` |
 
-Current patch set:
-- `Change Instagram share domain`
-- `Change TikTok share domain`
-- `Change Threads share domain`
+Experimental compatibility entries are kept for previously validated app versions where useful, but the linked versions above are the currently maintained targets.
 
 ## Use In Morphe
 
 Add this repository as a patch source in Morphe:
 - [Add source in Morphe](https://morphe.software/add-source?github=kareemlukitomo/morphe-patches)
 - Manual source URL: `https://github.com/kareemlukitomo/morphe-patches`
+- Worker metadata URL: `https://morphe.kareem.one/patches.json`
 
 Notes:
-- Releases publish a `.mpp` patch bundle on GitHub.
+- Releases publish a signed `.mpp` patch bundle on GitHub.
+- The Worker URL serves the newest signed release only.
 
 ## Release Flow
 
