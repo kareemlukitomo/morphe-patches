@@ -1,5 +1,5 @@
 {
-  "version": "v1.0.0",
+  "version": "26.4.29-9c0c89",
   "patches": [
     {
       "name": "Change Instagram share domain",

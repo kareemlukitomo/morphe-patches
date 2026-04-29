@@ -1,7 +1,7 @@
 {
-  "created_at": "",
-  "description": "",
-  "download_url": "",
-  "signature_download_url": "",
-  "version": ""
+  "created_at": "2026-04-29T12:24:52",
+  "description": "Kareem Morphe patch bundle",
+  "download_url": "https://github.com/kareemlukitomo/morphe-patches/releases/download/v26.4.29-9c0c89/patches-26.4.29-9c0c89.mpp",
+  "signature_download_url": "https://github.com/kareemlukitomo/morphe-patches/releases/download/v26.4.29-9c0c89/patches-26.4.29-9c0c89.mpp.asc",
+  "version": "26.4.29-9c0c89"
 }

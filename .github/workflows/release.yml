@@ -142,7 +142,7 @@ jobs:
                       "description": "Kareem Morphe patch bundle",
                       "download_url": f"{base}/{bundle_name}",
                       "signature_download_url": f"{base}/{bundle_name}.asc",
-                      "version": f"v{version}",
+                      "version": version,
                   },
                   indent=2,
               )
