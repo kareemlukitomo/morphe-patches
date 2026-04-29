@@ -74,4 +74,24 @@ object Constants {
                     ),
                 ),
         )
+
+    val COMPATIBILITY_TWITTER =
+        Compatibility(
+            name = "X / Twitter",
+            packageName = "com.twitter.android",
+            apkFileType = ApkFileType.APKM,
+            appIconColor = 0x000000,
+            targets =
+                listOf(
+                    AppTarget(
+                        version = "11.86.0-release.0",
+                        description = "X Stable version (all archs)",
+                    ),
+                    AppTarget(
+                        version = "10.86.0-release.0",
+                        description = "Previously validated X version",
+                        isExperimental = true,
+                    ),
+                ),
+        )
 }

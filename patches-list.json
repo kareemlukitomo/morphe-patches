@@ -50,6 +50,30 @@
       "options": []
     },
     {
+      "name": "Change Twitter share domain",
+      "description": "Rewrites generated Twitter/X share links to nitter.kareem.one.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.twitter.android": [
+          "11.86.0-release.0"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable Twitter PairIP startup checks",
+      "description": "Bypasses X/Twitter PairIP integrity startup checks that crash after APKM repacking.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.twitter.android": [
+          "11.86.0-release.0"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Sanitize Reddit share links",
       "description": "Stops Reddit from appending tracking query parameters to shared links.",
       "use": true,
@@ -57,6 +81,18 @@
       "compatiblePackages": {
         "com.reddit.frontpage": [
           "2026.17.0"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Sanitize Twitter share links",
+      "description": "Stops Twitter/X from appending tracking query parameters to shared links.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.twitter.android": [
+          "11.86.0-release.0"
         ]
       },
       "options": []

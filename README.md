@@ -10,6 +10,7 @@ Targeted Morphe-compatible patches for small app-specific share-link fixes.
 | Threads | `com.instagram.barcelona` | [`426.0.0.36.67`](https://www.apkmirror.com/apk/instagram/threads/threads-426-0-0-36-67-release/) | `Change Threads share domain` |
 | TikTok | `com.zhiliaoapp.musically` | [`44.9.3`](https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly-44-9-3-release/) | `Change TikTok share domain` |
 | Reddit | `com.reddit.frontpage` | [`2026.17.0`](https://www.apkmirror.com/apk/redditinc/reddit/reddit-2026-17-0-release/) | `Change Reddit share domain`, `Sanitize Reddit share links` |
+| X / Twitter | `com.twitter.android` | [`11.86.0-release.0`](https://www.apkmirror.com/apk/x-corp/twitter/x-11-86-0-release-0-release/) | `Disable Twitter PairIP startup checks`, `Change Twitter share domain`, `Sanitize Twitter share links` |
 
 Experimental compatibility entries are kept for previously validated app versions where useful, but the linked versions above are the currently maintained targets.
 
