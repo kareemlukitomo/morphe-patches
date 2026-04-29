@@ -132,7 +132,5 @@ local.properties
 # Local secrets
 secrets/*.yaml
 secrets/*.yml
-!secrets/*.sops.yaml
-!secrets/*.sops.yml
 !secrets/*.example.yaml
 !secrets/*.example.yml

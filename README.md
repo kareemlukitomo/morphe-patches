@@ -27,9 +27,10 @@ Notes:
 ## Release Flow
 
 - Development happens on feature branches and lands on `dev` before `main`.
-- Semantic versioning and semantic commits drive automated releases.
-- Pushing to `dev` or `main` runs [release.yml](.github/workflows/release.yml).
-- Release metadata is written to `patches-bundle.json` and `patches-list.json`.
+- Releases are tag-driven CalVer bundles. Use tags like `v26.4.29-abcdef`, where `abcdef` is the first six characters of the tagged commit SHA.
+- Pushing a matching tag runs [release.yml](.github/workflows/release.yml) and publishes the `.mpp` bundle.
+- Release metadata is generated as release assets in `patches-bundle.json` and `patches-list.json`.
+- After the GitHub release exists, sign the `.mpp` with `mise run sign-release -- --tag v26.4.29-abcdef`.
 
 ## Build From Source
 
