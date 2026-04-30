@@ -1,18 +1,19 @@
 # Cloudflare `patches.json` Worker
 
-This repository includes an optional Worker project that exposes the latest signed bundle as a simple `patches.json` endpoint.
+This repository includes an optional Worker project that exposes the latest signed release as Morphe-compatible patch source JSON.
 
-Target hostname:
-- `https://morphe.kareem.one/patches.json`
+Target source URL:
+- `https://morphe.kareem.one`
 
 ## What It Does
 
-- Redirects any non-`/patches.json` request to the repository homepage.
+- Serves `patches-list.json` and `patches-bundle.json` from the newest signed GitHub release.
+- Keeps `/patches.json` as a compatibility alias for `patches-list.json`.
 - Optionally redirects non-canonical hosts back to `PRIMARY_HOST`.
 - Reads the public GitHub releases Atom feed for this repository.
 - Selects the newest release authored by an allowed actor.
 - Optionally requires a detached `.asc` signature before serving that release.
-- Returns a Morphe-style bundle document with `version`, `created_at`, `download_url`, and `signature_download_url`.
+- Does not require Worker redeploys when a new release is signed.
 
 ## Default Asset Expectations
 
@@ -20,6 +21,8 @@ The Worker derives release assets from the tag name:
 
 - bundle: `patches-<version>.mpp`
 - signature: `patches-<version>.mpp.asc`
+- list metadata: `patches-list.json`
+- bundle metadata: `patches-bundle.json`
 
 For tag `v1.2.3`, the Worker expects:
 
@@ -58,7 +61,7 @@ npx wrangler deploy
 
 ## Signing
 
-If `REQUIRE_SIGNATURE = "true"`, the newest unsigned GitHub release is ignored until the matching `.asc` asset exists.
+If `REQUIRE_SIGNATURE = "true"`, the newest unsigned GitHub release is ignored until the matching `.asc` asset exists. While an unsigned newer release is pending, Worker responses use a short cache TTL so the signed release appears quickly after upload.
 
 Use the repo task to sign and optionally upload the missing detached signature:
 

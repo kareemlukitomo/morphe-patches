@@ -19,7 +19,8 @@ export default {
       return serveIcon(requestUrl, ctx);
     }
 
-    if (requestUrl.pathname !== "/patches.json") {
+    const route = routeForPath(requestUrl.pathname);
+    if (!route) {
       return Response.redirect(repoHomepage, 302);
     }
 
@@ -37,7 +38,7 @@ export default {
     const cache = caches.default;
     const cacheOrigin = primaryHost ? `https://${primaryHost}` : requestUrl.origin;
     const cacheKey = new Request(
-      `${cacheOrigin}/patches.json?requireSignature=${config.requireSignature ? "1" : "0"}&allowPrerelease=${config.allowPrerelease ? "1" : "0"}`,
+      `${cacheOrigin}${route.cachePath}?v=${WORKER_CACHE_VERSION}&requireSignature=${config.requireSignature ? "1" : "0"}&allowPrerelease=${config.allowPrerelease ? "1" : "0"}`,
     );
     const cached = await cache.match(cacheKey);
     if (cached) return cached;
@@ -47,17 +48,73 @@ export default {
       return text(release.message, release.status);
     }
 
-    const body = JSON.stringify(buildBundle(release.value), null, 2);
-    const response = new Response(body, {
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": "public, max-age=300",
-      },
-    });
+    const cacheSeconds = release.value.skippedUnsignedNewer ? 30 : 300;
+    const response = await buildResponse(route, release.value, cacheSeconds);
     ctx.waitUntil(cache.put(cacheKey, response.clone()));
     return response;
   },
 };
+
+const WORKER_CACHE_VERSION = "3";
+
+const ROUTES = new Map([
+  [
+    "/",
+    {
+      asset: "patchesListUrl",
+      cachePath: "/patches-list.json",
+      contentType: "application/json; charset=utf-8",
+      kind: "asset",
+    },
+  ],
+  [
+    "/patches.json",
+    {
+      asset: "patchesListUrl",
+      cachePath: "/patches-list.json",
+      contentType: "application/json; charset=utf-8",
+      kind: "asset",
+    },
+  ],
+  [
+    "/patches-list.json",
+    {
+      asset: "patchesListUrl",
+      cachePath: "/patches-list.json",
+      contentType: "application/json; charset=utf-8",
+      kind: "asset",
+    },
+  ],
+  [
+    "/patches-bundle.json",
+    {
+      asset: "bundleJsonUrl",
+      cachePath: "/patches-bundle.json",
+      contentType: "application/json; charset=utf-8",
+      kind: "asset",
+    },
+  ],
+  [
+    "/bundle.json",
+    {
+      cachePath: "/bundle.json",
+      kind: "bundle",
+    },
+  ],
+]);
+
+function routeForPath(pathname) {
+  let normalized = pathname.replace(/\/+$/, "") || "/";
+
+  // Be forgiving if a user entered the old documented /patches.json URL as
+  // the source base and the client app appended /patches-list.json or
+  // /patches-bundle.json to it.
+  if (normalized.startsWith("/patches.json/")) {
+    normalized = normalized.slice("/patches.json".length) || "/patches.json";
+  }
+
+  return ROUTES.get(normalized);
+}
 
 const ICON_SOURCE_URL =
   "https://www.getmonero.org/press-kit/symbols/monero-symbol-on-white-480.png";
@@ -115,19 +172,24 @@ async function findRelease(config) {
 
   const feedText = await response.text();
   const releases = parseReleaseFeed(feedText, config);
+  let skippedUnsignedNewer = false;
 
   for (const release of releases) {
     if (release.prerelease && !config.allowPrerelease) continue;
     if (!config.allowedActors.has(release.author)) continue;
 
     const signatureExists = await hasAsset(release.signatureUrl);
-    if (config.requireSignature && !signatureExists) continue;
+    if (config.requireSignature && !signatureExists) {
+      skippedUnsignedNewer = true;
+      continue;
+    }
 
     return {
       ok: true,
       value: {
         ...release,
         signatureExists,
+        skippedUnsignedNewer,
       },
     };
   }
@@ -137,6 +199,19 @@ async function findRelease(config) {
     status: 503,
     message: "Could not find a release with a signed .mpp bundle that matches the worker policy.",
   };
+}
+
+async function buildResponse(route, release, cacheSeconds) {
+  if (route.kind === "bundle") {
+    const body = JSON.stringify(buildBundle(release), null, 2);
+    return json(body, cacheSeconds, release);
+  }
+
+  if (route.kind === "asset") {
+    return proxyReleaseAsset(release[route.asset], route.contentType, cacheSeconds, release);
+  }
+
+  return text("Unknown worker route", 500);
 }
 
 function buildBundle(release) {
@@ -169,9 +244,28 @@ function parseReleaseFeed(feedText, config) {
       prerelease: isPrereleaseVersion(version),
       publishedAt,
       name: `Kareem Patches ${tagName}`,
+      bundleJsonUrl: `${baseUrl}/patches-bundle.json`,
       downloadUrl: `${baseUrl}/${bundleName}`,
+      patchesListUrl: `${baseUrl}/patches-list.json`,
       signatureUrl: `${baseUrl}/${bundleName}.asc`,
     };
+  });
+}
+
+async function proxyReleaseAsset(url, fallbackContentType, cacheSeconds, release) {
+  const upstream = await fetch(url, {
+    headers: {
+      Accept: fallbackContentType,
+      "User-Agent": "morphe-patches-worker",
+    },
+  });
+
+  if (!upstream.ok) {
+    return text(`Release asset lookup failed: ${upstream.status}`, 502);
+  }
+
+  return new Response(upstream.body, {
+    headers: commonHeaders(fallbackContentType, cacheSeconds, release),
   });
 }
 
@@ -237,6 +331,20 @@ function text(message, status) {
       "cache-control": "no-store",
     },
   });
+}
+
+function json(body, cacheSeconds, release) {
+  return new Response(body, {
+    headers: commonHeaders("application/json; charset=utf-8", cacheSeconds, release),
+  });
+}
+
+function commonHeaders(contentType, cacheSeconds, release) {
+  return {
+    "cache-control": `public, max-age=${cacheSeconds}`,
+    "content-type": contentType,
+    "x-morphe-release-tag": release.tagName,
+  };
 }
 
 function trim(value) {
