@@ -265,6 +265,16 @@ def sign_release(args: argparse.Namespace, tag: str, dry_run: bool) -> None:
     run(command, env=signing_env())
 
 
+def normalize_bundle_metadata_timestamp(path: Path) -> None:
+    import json
+
+    data = json.loads(path.read_text())
+    created_at = str(data.get("created_at", ""))
+    if created_at:
+        data["created_at"] = created_at.replace("Z", "").split(".", 1)[0]
+        path.write_text(json.dumps(data, indent=2) + "\n")
+
+
 def sync_release_metadata_assets(args: argparse.Namespace, tag: str, branch: str) -> None:
     print("Syncing release metadata assets into the repository root...")
     run(
@@ -283,6 +293,7 @@ def sync_release_metadata_assets(args: argparse.Namespace, tag: str, branch: str
         ]
     )
 
+    normalize_bundle_metadata_timestamp(Path("patches-bundle.json"))
     run(["git", "add", "patches-bundle.json", "patches-list.json"])
     staged_diff = subprocess.run(
         ["git", "diff", "--cached", "--quiet", "--", "patches-bundle.json", "patches-list.json"],
