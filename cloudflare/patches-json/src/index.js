@@ -55,14 +55,14 @@ export default {
   },
 };
 
-const WORKER_CACHE_VERSION = "3";
+const WORKER_CACHE_VERSION = "4";
 
 const ROUTES = new Map([
   [
     "/",
     {
-      asset: "patchesListUrl",
-      cachePath: "/patches-list.json",
+      asset: "bundleJsonUrl",
+      cachePath: "/patches-bundle.json",
       contentType: "application/json; charset=utf-8",
       kind: "asset",
     },
@@ -70,8 +70,8 @@ const ROUTES = new Map([
   [
     "/patches.json",
     {
-      asset: "patchesListUrl",
-      cachePath: "/patches-list.json",
+      asset: "bundleJsonUrl",
+      cachePath: "/patches-bundle.json",
       contentType: "application/json; charset=utf-8",
       kind: "asset",
     },

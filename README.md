@@ -19,11 +19,11 @@ Experimental compatibility entries are kept for previously validated app version
 Add this repository as a patch source in Morphe:
 - [Add source in Morphe](https://morphe.software/add-source?github=kareemlukitomo/morphe-patches)
 - Manual source URL: `https://github.com/kareemlukitomo/morphe-patches`
-- Worker source URL: `https://morphe.kareem.one`
+- Worker source URL: `https://morphe.kareem.one/patches-bundle.json`
 
 Notes:
 - Releases publish a signed `.mpp` patch bundle on GitHub.
-- The Worker URL serves `patches-list.json` and `patches-bundle.json` from the newest signed release, so it does not need to be rebuilt for each release.
+- The Worker URL serves `patches-bundle.json` from the newest signed release, so it does not need to be rebuilt for each release.
 
 ## Release Flow
 

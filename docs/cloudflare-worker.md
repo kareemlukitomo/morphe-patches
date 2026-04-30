@@ -3,12 +3,13 @@
 This repository includes an optional Worker project that exposes the latest signed release as Morphe-compatible patch source JSON.
 
 Target source URL:
-- `https://morphe.kareem.one`
+- `https://morphe.kareem.one/patches-bundle.json`
 
 ## What It Does
 
-- Serves `patches-list.json` and `patches-bundle.json` from the newest signed GitHub release.
-- Keeps `/patches.json` as a compatibility alias for `patches-list.json`.
+- Serves `patches-bundle.json` from the newest signed GitHub release.
+- Keeps `/patches.json` as a compatibility alias for `patches-bundle.json`.
+- Also serves `/patches-list.json` for diagnostics/catalog consumers.
 - Optionally redirects non-canonical hosts back to `PRIMARY_HOST`.
 - Reads the public GitHub releases Atom feed for this repository.
 - Selects the newest release authored by an allowed actor.

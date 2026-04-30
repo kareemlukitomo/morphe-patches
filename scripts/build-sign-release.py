@@ -41,6 +41,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--allow-dirty", action="store_true", default=os.getenv("ALLOW_DIRTY", "0") == "1")
     parser.add_argument("--skip-push", action="store_true", default=os.getenv("SKIP_PUSH", "0") == "1")
     parser.add_argument("--skip-sign", action="store_true", default=os.getenv("SKIP_SIGN", "0") == "1")
+    parser.add_argument(
+        "--skip-metadata-commit",
+        action="store_true",
+        default=os.getenv("SKIP_METADATA_COMMIT", "0") == "1",
+        help="Do not download release metadata assets, commit them to the branch, and push.",
+    )
     parser.add_argument("--dry-run", action="store_true", default=os.getenv("DRY_RUN", "0") == "1")
     parser.add_argument("--keep", action="store_true", default=os.getenv("KEEP", "0") == "1")
     parser.add_argument("--gpg-key", default=os.getenv("GPG_KEY", ""))
@@ -259,6 +265,40 @@ def sign_release(args: argparse.Namespace, tag: str, dry_run: bool) -> None:
     run(command, env=signing_env())
 
 
+def sync_release_metadata_assets(args: argparse.Namespace, tag: str, branch: str) -> None:
+    print("Syncing release metadata assets into the repository root...")
+    run(
+        [
+            "gh",
+            "release",
+            "download",
+            tag,
+            "--repo",
+            args.repo,
+            "--pattern",
+            "patches-bundle.json",
+            "--pattern",
+            "patches-list.json",
+            "--clobber",
+        ]
+    )
+
+    run(["git", "add", "patches-bundle.json", "patches-list.json"])
+    staged_diff = subprocess.run(
+        ["git", "diff", "--cached", "--quiet", "--", "patches-bundle.json", "patches-list.json"],
+        check=False,
+    )
+    if staged_diff.returncode == 0:
+        print("Release metadata is already current.")
+        return
+
+    run(["git", "commit", "-m", f"chore: publish patch metadata for {tag}"])
+    if args.skip_push:
+        print("Skipping metadata push because --skip-push was provided.")
+        return
+    run(["git", "push", args.remote, branch])
+
+
 def main() -> int:
     args = parse_args()
     require_command("git")
@@ -301,6 +341,10 @@ def main() -> int:
         return 0
 
     sign_release(args, tag, dry_run=False)
+    if args.skip_metadata_commit:
+        print("Skipping metadata commit because --skip-metadata-commit was provided.")
+    else:
+        sync_release_metadata_assets(args, tag, branch)
     print("Build, release, and signing flow completed.")
     return 0
 
