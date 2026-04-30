@@ -30,7 +30,15 @@ def require_command(name: str) -> None:
 
 
 def github_token() -> str:
-    return os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN") or ""
+    token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN") or ""
+    if token:
+        return token
+    if shutil.which("gh") is None:
+        return ""
+    try:
+        return subprocess.check_output(["gh", "auth", "token"], text=True).strip()
+    except subprocess.CalledProcessError:
+        return ""
 
 
 def github_get(url: str) -> dict | list:
